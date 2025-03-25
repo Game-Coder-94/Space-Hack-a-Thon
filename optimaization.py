@@ -37,9 +37,53 @@ class ISSStowageOptimizer:
         self.cooling_rate = cooling_rate
         self.min_temperature = min_temp
         self.best_solution = None
+        self.stowage = {}
 
     def generate_initial_solution(self):
         return{container['id'] : random.choice(self.modules) for container in self.containers}
+    
+    def retrival_steps(self, item_id):
+        """
+        Calculate the number of items that must be moved to retrieve a specific item.
+        - If the item is directly visible, return 0.
+        - Otherwise, count the number of blocking items.
+        """
+        module = self.stowage[item_id]
+        items_in_module = [c for c in self.containers if self.stowage[c['id']] == module]
+
+        items_in_module.sort(key=lambda x: x.get('depth', 0), reverse=True)
+
+        steps = 0
+        for item in items_in_module:
+            if item['id'] == item_id:
+                return steps
+            steps += 1
+
+        return steps
+    
+    def suggest_fastest_retrieval(self):
+        
+        retrival_list = []
+
+        for container in self.containers:
+            item_id = container['id']
+            steps = self.retrival_steps(item_id)
+            expiry_date_str = container.get('expiry', '2100-01-01')
+            expiry_date = datetime.strptime(expiry_date_str, '%Y-%m-%d')
+            days_to_expiry = (expiry_date - datetime.today()).days
+
+            retrival_list.append((container['name'], steps, days_to_expiry, self.stowage[item_id]))
+
+        retrival_list.sort(key=lambda x: (x[1], x[2]))      # sorts by steps and expiry
+
+        best_item = retrival_list[0]
+        print()
+        print(f"📦 Suggested Item for Quick Retrieval: {best_item[0]}")
+        print(f"   🔹 Retrieval Steps Needed: {best_item[1]}")
+        print(f"   ⏳ Days Until Expiry: {best_item[2]}")
+        print(f"   📍 Stored in Module: {best_item[3]}")
+
+
     
     # Objective Function
     def objective_function(self, stwoage):
@@ -97,6 +141,7 @@ class ISSStowageOptimizer:
             T *= self.cooling_rate
 
         self.best_solution = best_solution
+        self.stowage = best_solution
         return best_solution
     
     def display_solution(self):
@@ -129,3 +174,4 @@ if __name__ == "__main__":
     optimizer = ISSStowageOptimizer(MODULES, CONTAINERS)
     optimizer.simulated_annealing()
     optimizer.display_solution()
+    optimizer.suggest_fastest_retrieval()
