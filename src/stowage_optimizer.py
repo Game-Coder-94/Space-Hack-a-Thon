@@ -1,6 +1,7 @@
+from src.config import MODULE_DIMENSIONS
+from datetime import datetime
 import random
 import math
-from datetime import datetime
 
 containers = [{
     'id' : 1,
@@ -39,51 +40,51 @@ class ISSStowageOptimizer:
         self.best_solution = None
         self.stowage = {}
 
-    def generate_initial_solution(self):
+    def initialize_solution(self):
+        """Creates an initial placement using a heuristic (BFD-like)."""
         return{container['id'] : random.choice(self.modules) for container in self.containers}
     
-    def retrival_steps(self, item_id):
-        """
-        Calculate the number of items that must be moved to retrieve a specific item.
-        - If the item is directly visible, return 0.
-        - Otherwise, count the number of blocking items.
-        """
-        module = self.stowage[item_id]
-        items_in_module = [c for c in self.containers if self.stowage[c['id']] == module]
+    # Function to find avaialble space
+    def find_space_in_module(self, module, container):
+        """Finds an available space in the module for the container."""
+        module_dims = MODULE_DIMENSIONS[module]
+        occupied = []  # List of occupied spaces
 
-        items_in_module.sort(key=lambda x: x.get('depth', 0), reverse=True)
+        for placed in self.stowage.values():
+            if placed["containerId"] == module:
+                occupied.append(placed["position"])
 
-        steps = 0
-        for item in items_in_module:
-            if item['id'] == item_id:
-                return steps
-            steps += 1
+        # Brute-force search for an available space
+        for x in range(0, module_dims["width"], 5):
+            for y in range(0, module_dims["depth"], 5):
+                for z in range(0, module_dims["height"], 5):
+                    end_x, end_y, end_z = x + container["width"], y + container["depth"], z + container["height"]
 
-        return steps
-    
-    def suggest_fastest_retrieval(self):
-        
-        retrival_list = []
+                    # Check if within module boundaries
+                    if end_x > module_dims["width"] or end_y > module_dims["depth"] or end_z > module_dims["height"]:
+                        continue
 
-        for container in self.containers:
-            item_id = container['id']
-            steps = self.retrival_steps(item_id)
-            expiry_date_str = container.get('expiry', '2100-01-01')
-            expiry_date = datetime.strptime(expiry_date_str, '%Y-%m-%d')
-            days_to_expiry = (expiry_date - datetime.today()).days
+                    # Check for overlap with occupied spaces
+                    overlap = False
+                    for occ in occupied:
+                        if not (
+                            end_x <= occ["startCoordinates"]["width"] or
+                            x >= occ["endCoordinates"]["width"] or
+                            end_y <= occ["startCoordinates"]["depth"] or
+                            y >= occ["endCoordinates"]["depth"] or
+                            end_z <= occ["startCoordinates"]["height"] or
+                            z >= occ["endCoordinates"]["height"]
+                        ):
+                            overlap = True
+                            break
 
-            retrival_list.append((container['name'], steps, days_to_expiry, self.stowage[item_id]))
+                    if not overlap:
+                        return {
+                            "startCoordinates": {"width": x, "depth": y, "height": z},
+                            "endCoordinates": {"width": end_x, "depth": end_y, "height": end_z}
+                        }
 
-        retrival_list.sort(key=lambda x: (x[1], x[2]))      # sorts by steps and expiry
-
-        best_item = retrival_list[0]
-        print()
-        print(f"📦 Suggested Item for Quick Retrieval: {best_item[0]}")
-        print(f"   🔹 Retrieval Steps Needed: {best_item[1]}")
-        print(f"   ⏳ Days Until Expiry: {best_item[2]}")
-        print(f"   📍 Stored in Module: {best_item[3]}")
-
-
+        return None  # No space found
     
     # Objective Function
     def objective_function(self, stwoage):
@@ -118,12 +119,14 @@ class ISSStowageOptimizer:
         
         return mass_imbalance + total_penalty
 
+    # Finding neighbour (slightly different )
     def generate_neighbour(self, stowage):
         new_stowage = stowage.copy()
         container_id = random.choice(list(stowage.keys()))
         new_stowage[container_id] = random.choice(self.modules)
         return new_stowage
     
+    # Implementation of Simulated Anneling
     def simulated_annealing(self):
         current_solution = self.generate_initial_solution()
         best_solution = current_solution.copy()
@@ -150,28 +153,3 @@ class ISSStowageOptimizer:
             print(f'Container {container["id"]} ({container["name"]}) -> {self.best_solution[container["id"]]}')
 
 
-
-# Example data
-if __name__ == "__main__":
-    MODULES = ["Destiny", "Columbus", "Kibo", "Unity", "Zvezda"]
-    
-    # List of container dictionaries with detailed attributes
-    CONTAINERS = [
-        {
-            'id': 1, 'name': 'Food items', 'width': 10, 'depth': 10, 'height': 10, 'mass': 5,
-            'priority': 80, 'expiry': '2025-05-20', 'usage': 30, 'preferred-zone': 'Crew_Quaters'
-        },
-        {
-            'id': 2, 'name': 'Medical Kit', 'width': 5, 'depth': 5, 'height': 5, 'mass': 2,
-            'priority': 95, 'expiry': '2024-12-15', 'usage': 70, 'preferred-zone': 'Destiny'
-        },
-        {
-            'id': 3, 'name': 'Toolbox', 'width': 15, 'depth': 10, 'height': 10, 'mass': 8,
-            'priority': 60, 'expiry': '2030-01-01', 'usage': 20, 'preferred-zone': 'Unity'
-        }
-    ]
-
-    optimizer = ISSStowageOptimizer(MODULES, CONTAINERS)
-    optimizer.simulated_annealing()
-    optimizer.display_solution()
-    optimizer.suggest_fastest_retrieval()
