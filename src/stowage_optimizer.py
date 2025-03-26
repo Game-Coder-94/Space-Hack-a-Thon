@@ -42,49 +42,128 @@ class ISSStowageOptimizer:
 
     def initialize_solution(self):
         """Creates an initial placement using a heuristic (BFD-like)."""
-        return{container['id'] : random.choice(self.modules) for container in self.containers}
+        solution = {}
+        available_space = {module: [] for module in self.modules}   # Track free spaces
+
+        for container in sorted(self.containers, key=self.get_caontainer_volume, reverse=True):
+            placed = False
+            for module in self.modules:
+                if self.can_fit(module, container, available_space[module]):
+                    position = self.get_best_fit_position(module, container, available_space[module])
+                    solution[container['id']] = {'module' : module, 'position' : position}
+                    available_space[module].append(position)    # Mark space is occupied
+                    placed = True
+                    break   # Stop once placed
+
+            if not placed:
+                return None # No feasible initial solution
+            
+        return solution
     
-    # Function to find avaialble space
-    def find_space_in_module(self, module, container):
-        """Finds an available space in the module for the container."""
-        module_dims = MODULE_DIMENSIONS[module]
-        occupied = []  # List of occupied spaces
+    # Calculate Volume of a container
+    def get_container_volume(self, container):
+        return container['width'] * container['height'] * container['depth']
+    
+    def can_fit(self, module, container, occupied_positions):
+        """Checks if the container can fit in the module without overlapping"""
+        module_dims = self.modules[module]
 
-        for placed in self.stowage.values():
-            if placed["containerId"] == module:
-                occupied.append(placed["position"])
+        for x in range(0, module_dims['width'], 5):
+            for y in range(0, module_dims['depth'], 5):
+                for z in range(0, module_dims['height'], 5):
+                    end_x = x + container['width']
+                    end_y = y + container['depth']
+                    end_z = z + container['height']
 
-        # Brute-force search for an available space
-        for x in range(0, module_dims["width"], 5):
-            for y in range(0, module_dims["depth"], 5):
-                for z in range(0, module_dims["height"], 5):
-                    end_x, end_y, end_z = x + container["width"], y + container["depth"], z + container["height"]
-
-                    # Check if within module boundaries
-                    if end_x > module_dims["width"] or end_y > module_dims["depth"] or end_z > module_dims["height"]:
+                    # Check if within module dimensions
+                    if end_x > module_dims['width'] or end_y > module_dims['depth'] or end_z > module_dims['height']:
                         continue
 
-                    # Check for overlap with occupied spaces
-                    overlap = False
-                    for occ in occupied:
-                        if not (
-                            end_x <= occ["startCoordinates"]["width"] or
-                            x >= occ["endCoordinates"]["width"] or
-                            end_y <= occ["startCoordinates"]["depth"] or
-                            y >= occ["endCoordinates"]["depth"] or
-                            end_z <= occ["startCoordinates"]["height"] or
-                            z >= occ["endCoordinates"]["height"]
-                        ):
-                            overlap = True
-                            break
+                    # Check overlapping
+                    if not any(self.overlaps(x, y, z, end_x, end_y, end_z, occ) for occ in occupied_positions):
+                        return True
+                    
+        return False
+    
+    def get_best_fit_position(self, module, container, occupied_positions):
+        """Finds the best placement with minimal wasted space"""
+        module_dims = self.modules[module]
+        best_position = None
+        min_waste = float('inf')    # Didn't get it (understand)
 
-                    if not overlap:
-                        return {
-                            "startCoordinates": {"width": x, "depth": y, "height": z},
-                            "endCoordinates": {"width": end_x, "depth": end_y, "height": end_z}
-                        }
+        for x in range(0, module_dims['width'], 5):
+            for y in range(0, module_dims['depth'], 5):
+                for z in range(0, module_dims['height'], 5):
+                    end_x = x + container['width']
+                    end_y = y + container['depth']
+                    end_z = z + container['height']
 
-        return None  # No space found
+                    # Check if within module dimensions
+                    if end_x > module_dims['width'] or end_y > module_dims['depth'] or end_z > module_dims['height']:
+                        continue
+
+                    # Check overlapping
+                    if not any(self.overlaps(x, y, z, end_x, end_y, end_z, occ) for occ in occupied_positions):
+                        waste = (module_dims["width"] * module_dims["depth"] * module_dims["height"]) - self.get_container_volume(container)
+                        if waste < min_waste:
+                            min_waste = waste
+                            best_position = {
+                                "startCoordinates": {"width": x, "depth": y, "height": z},
+                                "endCoordinates": {"width": end_x, "depth": end_y, "height": end_z}
+                            }
+        
+        return best_position
+
+    def overlaps(self, x1, y1, z1, x2, y2, z2, occ):
+        """Checks if two positions overlap"""
+        return not (
+            x2 <= occ["startCoordinates"]["width"] or x1 >= occ["endCoordinates"]["width"] or
+            y2 <= occ["startCoordinates"]["depth"] or y1 >= occ["endCoordinates"]["depth"] or
+            z2 <= occ["startCoordinates"]["height"] or z1 >= occ["endCoordinates"]["height"]
+        )
+
+    
+    # # Function to find avaialble space
+    # def find_space_in_module(self, module, container):
+    #     """Finds an available space in the module for the container."""
+    #     module_dims = MODULE_DIMENSIONS[module]
+    #     occupied = []  # List of occupied spaces
+
+    #     for placed in self.stowage.values():
+    #         if placed["containerId"] == module:
+    #             occupied.append(placed["position"])
+
+    #     # Brute-force search for an available space
+    #     for x in range(0, module_dims["width"], 5):
+    #         for y in range(0, module_dims["depth"], 5):
+    #             for z in range(0, module_dims["height"], 5):
+    #                 end_x, end_y, end_z = x + container["width"], y + container["depth"], z + container["height"]
+
+    #                 # Check if within module boundaries
+    #                 if end_x > module_dims["width"] or end_y > module_dims["depth"] or end_z > module_dims["height"]:
+    #                     continue
+
+    #                 # Check for overlap with occupied spaces
+    #                 overlap = False
+    #                 for occ in occupied:
+    #                     if not (
+    #                         end_x <= occ["startCoordinates"]["width"] or
+    #                         x >= occ["endCoordinates"]["width"] or
+    #                         end_y <= occ["startCoordinates"]["depth"] or
+    #                         y >= occ["endCoordinates"]["depth"] or
+    #                         end_z <= occ["startCoordinates"]["height"] or
+    #                         z >= occ["endCoordinates"]["height"]
+    #                     ):
+    #                         overlap = True
+    #                         break
+
+    #                 if not overlap:
+    #                     return {
+    #                         "startCoordinates": {"width": x, "depth": y, "height": z},
+    #                         "endCoordinates": {"width": end_x, "depth": end_y, "height": end_z}
+    #                     }
+
+    #     return None  # No space found
     
     # Objective Function
     def objective_function(self, stwoage):
