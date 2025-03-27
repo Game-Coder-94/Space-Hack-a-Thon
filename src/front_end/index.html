@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Stowage Form</title>
+    <script>
+        async function submitForm(event) {
+            event.preventDefault(); // Prevent page reload
+            
+            let formData = {
+                id: document.getElementById("id").value,
+                name: document.getElementById("name").value,
+                width: parseInt(document.getElementById("width").value),
+                depth: parseInt(document.getElementById("depth").value),
+                height: parseInt(document.getElementById("height").value),
+                mass: parseInt(document.getElementById("mass").value),
+                priority: parseInt(document.getElementById("priority").value),
+                expiry: document.getElementById("expiry").value,
+                usage: parseInt(document.getElementById("usage").value),
+                preferred_zone: document.getElementById("preferred-zone").value
+            };
+
+            let response = await fetch("/submit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            let result = await response.json();
+            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+        }
+    </script>
+</head>
+<body>
+    <h2>Container Stowage Form</h2>
+    <form onsubmit="submitForm(event)">
+        <label>ID: <input type="number" id="id" required></label><br>
+        <label>Name: <input type="text" id="name" required></label><br>
+        <label>Width: <input type="number" id="width" required></label><br>
+        <label>Depth: <input type="number" id="depth" required></label><br>
+        <label>Height: <input type="number" id="height" required></label><br>
+        <label>Mass: <input type="number" id="mass" required></label><br>
+        <label>Priority: <input type="number" id="priority" required></label><br>
+        <label>Expiry: <input type="date" id="expiry" required></label><br>
+        <label>Usage: <input type="number" id="usage" required></label><br>
+        <label>Preferred Zone: <input type="text" id="preferred-zone" required></label><br>
+        <button type="submit">Submit</button>
+    </form>
+    <h3>Result:</h3>
+    <pre id="result"></pre>
+</body>
+</html>

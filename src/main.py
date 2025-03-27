@@ -1,43 +1,100 @@
-from src.stowage_optimizer import ISSStowageOptimizer
-from src.retrieval import suggest_fastest_retrieval
-from src.utils import generate_stowage_response
+from config import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
+from stowage_optimizer import StowageOptimizer
+from rearrangement import RearrangementOptimizer
+from retrieval import RetrievalOptimizer
+from datetime import datetime
+from rearrangement import RearrangementOptimizer
 
 
-def main():
-    optimizer = ISSStowageOptimizer()
-    optimizer.simulated_annealing()  # Run optimization
-    retrieval = suggest_fastest_retrieval(optimizer)  # Suggest fastest item
+# Initialize with container capacities
+container_capacities = {
+    "Crew_Quarters": 100000,
+    "Destiny": 80000,
+    "Columbus": 90000
+}
 
-    # Generate response
-    response = generate_stowage_response(optimizer.stowage, retrieval)
-    print(response)
+# Sample Containers
+containers = [
+    {
+        "id": 1,
+        "name": "Food Items",
+        "width": 50,
+        "depth": 50,
+        "height": 50,
+        "mass": 5,
+        "priority": 80,
+        "expiry": "2025-05-20",
+        "usage": 30,
+        "preferred-zone": "Crew_Quarters"
+    },
+    {
+        "id": 2,
+        "name": "Medical Kit",
+        "width": 30,
+        "depth": 30,
+        "height": 30,
+        "mass": 2,
+        "priority": 90,
+        "expiry": "2024-12-15",
+        "usage": 60,
+        "preferred-zone": "Columbus"
+    }
+]
+
+rearrangement_optimizer = RearrangementOptimizer(INITIAL_STOWAGE_SOLUTION, CONTAINER_CAPACITIES)
+
+new_item = {
+    "id": 3,
+    "name": "Medical Kit",
+    "width": 20,
+    "depth": 20,
+    "height": 20,
+    "mass": 10,
+    "priority": 90,
+    "expiry": "2026-01-01",
+    "usage": 50,
+    "preferred-zone": "Crew_Quarters"
+}
+
+
+
+# Define ISS Modules (width, depth, height in cm)
+modules = {
+    "Crew_Quarters": {"width": 100, "depth": 100, "height": 200},
+    "Columbus": {"width": 150, "depth": 150, "height": 250}
+}
 
 if __name__ == "__main__":
-    main()
+    # Assuming you have an instance of RetrievalOptimizer
+    stowage_solution = {
+        "placements": [
+            {
+                "itemId": "item1",
+                "name": "Food Pack",
+                "position": {"startCoordinates": {"height": 1}, "endCoordinates": {"height": 2}},
+                "containerId": "module1",
+                "expiryDate": datetime(2025, 4, 1)
+            },
+            {
+                "itemId": "item2",
+                "name": "Food Pack",
+                "position": {"startCoordinates": {"height": 3}, "endCoordinates": {"height": 4}},
+                "containerId": "module1",
+                "expiryDate": datetime(2025, 3, 30)
+            }
+        ]
+    }
 
+    optimizer = RetrievalOptimizer(stowage_solution)
 
+    # Search for an item by name
+    result = optimizer.search_item("Food Pack")
 
-# Example data
-if __name__ == "__main__":
-    MODULES = ["Destiny", "Columbus", "Kibo", "Unity", "Zvezda"]
-    
-    # List of container dictionaries with detailed attributes
-    CONTAINERS = [
-        {
-            'id': 1, 'name': 'Food items', 'width': 10, 'depth': 10, 'height': 10, 'mass': 5,
-            'priority': 80, 'expiry': '2025-05-20', 'usage': 30, 'preferred-zone': 'Crew_Quaters'
-        },
-        {
-            'id': 2, 'name': 'Medical Kit', 'width': 5, 'depth': 5, 'height': 5, 'mass': 2,
-            'priority': 95, 'expiry': '2024-12-15', 'usage': 70, 'preferred-zone': 'Destiny'
-        },
-        {
-            'id': 3, 'name': 'Toolbox', 'width': 15, 'depth': 10, 'height': 10, 'mass': 8,
-            'priority': 60, 'expiry': '2030-01-01', 'usage': 20, 'preferred-zone': 'Unity'
-        }
-    ]
+    # Print the result
+    if result["success"]:
+        print("Item found:", result)
+    else:
+        print("Error:", result["message"])
 
-    optimizer = ISSStowageOptimizer(MODULES, CONTAINERS)
-    optimizer.simulated_annealing()
-    optimizer.display_solution()
-    optimizer.suggest_fastest_retrieval()
+    rearrangement_result = rearrangement_optimizer.suggest_rearrangement(new_item)
+    print("Rearrangement Result:", rearrangement_result)
