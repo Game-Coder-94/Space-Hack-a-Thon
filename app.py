@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
-from rearrangement import RearrangementOptimizer
-from config import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
+from src.rearrangement import RearrangementOptimizer
+from src.config import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
 
 app = Flask(__name__, template_folder='front_end')
 
