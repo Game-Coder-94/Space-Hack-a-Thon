@@ -1,9 +1,4 @@
-def get_all_items():
-    all_items = []
-    for container_id, items in containers.items():
-        for item in items:
-            all_items.append({**item, "containerId": container_id})
-    return sorted(all_items, key=lambda x: x['itemId'])
+from src.database import get_all_items
 
 def binary_search(data, key, search_by):
     low, high = 0, len(data) - 1
