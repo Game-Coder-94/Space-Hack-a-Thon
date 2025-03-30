@@ -33,21 +33,23 @@
     </script>
 </head>
 <body>
-    <h2>Container Stowage Form</h2>
+    <h2 align="center">Container Stowage Form</h2>
+<table border="1" cellspacing="10" cellpading="6" align="center" width="300" height="900">
     <form onsubmit="submitForm(event)">
-        <label>ID: <input type="number" id="id" required></label><br>
-        <label>Name: <input type="text" id="name" required></label><br>
-        <label>Width: <input type="number" id="width" required></label><br>
-        <label>Depth: <input type="number" id="depth" required></label><br>
-        <label>Height: <input type="number" id="height" required></label><br>
-        <label>Mass: <input type="number" id="mass" required></label><br>
-        <label>Priority: <input type="number" id="priority" required></label><br>
-        <label>Expiry: <input type="date" id="expiry" required></label><br>
-        <label>Usage: <input type="number" id="usage" required></label><br>
-        <label>Preferred Zone: <input type="text" id="preferred-zone" required></label><br>
-        <button type="submit">Submit</button>
+        <tr><td align="center"><label>ID: <input type="number" id="id" required></label></tr></tr>
+        <tr><td align="center"> <label>Name: <input type="text" id="name" required></label></td></tr>
+        <tr><td align="center"><label>Width: <input type="number" id="width" required></label></td></tr>
+        <tr><td align="center"><label>Depth: <input type="number" id="depth" required></label></td></tr>
+        <tr><td align="center"><label>Height: <input type="number" id="height" required></label></td></tr>
+        <tr><td align="center"><label>Mass: <input type="number" id="mass" required></label></td></tr>
+        <tr><td align="center"><label>Priority: <input type="number" id="priority" required></label></td></tr>
+        <tr><td align="center"><label>Expiry: <input type="date" id="expiry" required></label></td></tr>
+        <tr><td align="center"><label>Usage: <input type="number" id="usage" required></label></td></tr>
+        <tr><td align="center"><label>Preferred Zone: <input type="text" id="preferred-zone" required></label></td></tr>
+        <tr><td align="center"><button type="submit">Submit</button></td></tr>
     </form>
-    <h3>Result:</h3>
+</table>
+    <h3 align="center">Result:</h3>
     <pre id="result"></pre>
 </body>
 </html>
