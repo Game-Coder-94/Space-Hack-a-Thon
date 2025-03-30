@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Cargo - Time Simulation</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Cosmic Cargo Hold 🌌</h1>
+            <h2>Time Simulation Interface</h2>
+        </header>
+
+        <div class="main-content">
+            <section class="controls">
+                <h3>Stasis Pod Control (Add Cargo)</h3>
+                <div class="input-group">
+                    <label for="itemName">Item Name:</label>
+                    <input type="text" id="itemName" placeholder="e.g., Nutrient Paste">
+                </div>
+                <div class="input-group">
+                    <label for="expiryDays">Expires In (Days):</label>
+                    <input type="number" id="expiryDays" min="1" value="10">
+                </div>
+                <div class="input-group">
+                    <label for="uses">Available Uses:</label>
+                    <input type="number" id="uses" min="1" value="5">
+                </div>
+                <button id="addItemBtn" class="btn">Add to Cargo</button>
+
+                <hr>
+
+                <h3>Time Warp Controls</h3>
+                 <p>Current Stardate (Day): <span id="currentDay">0</span></p>
+                 <div class="simulation-buttons">
+                    <button id="nextDayBtn" class="btn">Advance 1 Day</button>
+                    <div>
+                        <button id="fastForwardBtn" class="btn">Fast Forward</button>
+                        <input type="number" id="fastForwardDays" min="1" value="5">
+                        <span>Days</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="inventory-display">
+                <h3>Active Cargo Manifest</h3>
+                <div class="table-container">
+                    <table id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Expires In (Days)</th>
+                                <th>Uses Left</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <!-- Inventory items will be loaded here -->
+                        </tbody>
+                    </table>
+                     <p id="inventoryStatus" class="status-message">Cargo Hold Empty.</p>
+                </div>
+            </section>
+
+            <section class="waste-display">
+                <h3>Waste Disposal Log</h3>
+                <ul id="wasteList">
+                    <!-- Wasted items will be listed here -->
+                </ul>
+                 <p id="wasteStatus" class="status-message">No waste generated yet.</p>
+            </section>
+        </div>
+
+        <footer>
+            <p>Nebula Navigators Inc. - Simulation Module v1.0</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
