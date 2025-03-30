@@ -1,43 +1,23 @@
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
-from src.rearrangement import RearrangementOptimizer
-from src.config import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
+from src.routes.search import router as search_router
+from src.routes.placement import router as placement_router
+from src.routes.retrieval import router as retrieval_router
+from src.routes.waste_management import router as waste_management_router
+from src.routes.time_simulation import router as time_simulation_router
 
 app = FastAPI()
 
 # Set up templates
 templates = Jinja2Templates(directory="front_end")
 
-# Initialize optimizer
-rearrangement_optimizer = RearrangementOptimizer(INITIAL_STOWAGE_SOLUTION, CONTAINER_CAPACITIES)
+# Register routers
+app.include_router(search_router, prefix="/api/search", tags=["Search"])
+app.include_router(placement_router, prefix="/api/placement", tags=["Placement"])
+app.include_router(retrieval_router, prefix="/api/retrieval", tags=["Retrieval"])
+app.include_router(waste_management_router, prefix="/api/waste-management", tags=["Waste Management"])
+app.include_router(time_simulation_router, prefix="/api/time-simulation", tags=["Time Simulation"])
 
 @app.get("/")
-async def index(request: Request):
+async def index(request):
     return templates.TemplateResponse("index.html", {"request": request})
-
-@app.post("/submit")
-async def submit(request: Request):
-    data = await request.json()  # Get JSON data from frontend
-
-    new_item = {
-        "id": data["id"],
-        "name": data["name"],
-        "width": data["width"],
-        "depth": data["depth"],
-        "height": data["height"],
-        "mass": data["mass"],
-        "priority": data["priority"],
-        "expiry": data["expiry"],
-        "usage": data["usage"],
-        "preferred-zone": data["preferred_zone"]
-    }
-
-    # Run rearrangement logic
-    result = rearrangement_optimizer.suggest_rearrangement(new_item)
-    
-    return JSONResponse(content=result)
-
-# Serve static files if needed
-app.mount("/static", StaticFiles(directory="front_end/static"), name="static")

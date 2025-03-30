@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Placement</h1>
+    <form id="placementForm">
+        <div class="form-section">
+            <h2>Items</h2>
+            <div id="itemsContainer">
+                <!-- Item inputs will be added here dynamically -->
+            </div>
+            <button type="button" onclick="addItem()">Add Item</button>
+        </div>
+
+        <div class="form-section">
+            <h2>Containers</h2>
+            <div id="containersContainer">
+                <!-- Container inputs will be added here dynamically -->
+            </div>
+            <button type="button" onclick="addContainer()">Add Container</button>
+        </div>
+
+        <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+
+    <script>
+        function addItem() {
+            const itemsContainer = document.getElementById('itemsContainer');
+            const itemDiv = document.createElement('div');
+            itemDiv.innerHTML = `
+                <fieldset>
+                    <legend>Item</legend>
+                    <label>Item ID: <input type="text" name="itemId" required></label><br>
+                    <label>Name: <input type="text" name="name" required></label><br>
+                    <label>Width: <input type="number" name="width" required></label><br>
+                    <label>Depth: <input type="number" name="depth" required></label><br>
+                    <label>Height: <input type="number" name="height" required></label><br>
+                    <label>Priority: <input type="number" name="priority" required></label><br>
+                    <label>Expiry Date: <input type="date" name="expiryDate" required></label><br>
+                    <label>Usage Limit: <input type="number" name="usageLimit" required></label><br>
+                    <label>Preferred Zone: <input type="text" name="preferredZone" required></label>
+                </fieldset>
+            `;
+            itemsContainer.appendChild(itemDiv);
+        }
+
+        function addContainer() {
+            const containersContainer = document.getElementById('containersContainer');
+            const containerDiv = document.createElement('div');
+            containerDiv.innerHTML = `
+                <fieldset>
+                    <legend>Container</legend>
+                    <label>Container ID: <input type="text" name="containerId" required></label><br>
+                    <label>Zone: <input type="text" name="zone" required></label><br>
+                    <label>Width: <input type="number" name="width" required></label><br>
+                    <label>Depth: <input type="number" name="depth" required></label><br>
+                    <label>Height: <input type="number" name="height" required></label>
+                </fieldset>
+            `;
+            containersContainer.appendChild(containerDiv);
+        }
+
+        function submitForm() {
+            const form = document.getElementById('placementForm');
+
+            // Extract items
+            const items = [];
+            const itemFields = form.querySelectorAll('#itemsContainer fieldset');
+            itemFields.forEach(fieldset => {
+                const item = {
+                    itemId: fieldset.querySelector('[name="itemId"]').value,
+                    name: fieldset.querySelector('[name="name"]').value,
+                    width: parseFloat(fieldset.querySelector('[name="width"]').value),
+                    depth: parseFloat(fieldset.querySelector('[name="depth"]').value),
+                    height: parseFloat(fieldset.querySelector('[name="height"]').value),
+                    priority: parseInt(fieldset.querySelector('[name="priority"]').value),
+                    expiryDate: fieldset.querySelector('[name="expiryDate"]').value,
+                    usageLimit: parseInt(fieldset.querySelector('[name="usageLimit"]').value),
+                    preferredZone: fieldset.querySelector('[name="preferredZone"]').value
+                };
+                items.push(item);
+            });
+
+            // Extract containers
+            const containers = [];
+            const containerFields = form.querySelectorAll('#containersContainer fieldset');
+            containerFields.forEach(fieldset => {
+                const container = {
+                    containerId: fieldset.querySelector('[name="containerId"]').value,
+                    zone: fieldset.querySelector('[name="zone"]').value,
+                    width: parseFloat(fieldset.querySelector('[name="width"]').value),
+                    depth: parseFloat(fieldset.querySelector('[name="depth"]').value),
+                    height: parseFloat(fieldset.querySelector('[name="height"]').value)
+                };
+                containers.push(container);
+            });
+
+            // Combine data
+            const payload = {
+                items: items,
+                containers: containers
+            };
+
+            // Send data to the backend
+            fetch('/api/place', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Response: ' + JSON.stringify(data));
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

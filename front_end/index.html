@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Hack-a-Thon</title>
+    <link rel="stylesheet" href="/static/styles.css"> <!-- Optional CSS -->
+</head>
+<body>
+    <h1>Space Hack-a-Thon</h1>
+    <p>Select a functionality to proceed:</p>
+
+    <div class="menu">
+        <button onclick="navigateTo('/placement')">Placement</button>
+        <button onclick="navigateTo('/retrieval')">Retrieval</button>
+        <button onclick="navigateTo('/waste-management')">Waste Management</button>
+        <button onclick="navigateTo('/time-simulation')">Time Simulation</button>
+    </div>
+
+    <script>
+        function navigateTo(endpoint) {
+            window.location.href = endpoint;
+        }
+    </script>
+</body>
+</html>

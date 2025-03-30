@@ -1,17 +1,8 @@
-from config import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
-from stowage_optimizer import StowageOptimizer
+from database import CONTAINER_CAPACITIES, INITIAL_STOWAGE_SOLUTION
 from rearrangement import RearrangementOptimizer
 from retrieval import RetrievalOptimizer
+from services.placement_service import StowageOptimizer
 from datetime import datetime
-from rearrangement import RearrangementOptimizer
-
-
-# Initialize with container capacities
-container_capacities = {
-    "Crew_Quarters": 100000,
-    "Destiny": 80000,
-    "Columbus": 90000
-}
 
 # Sample Containers
 containers = [
@@ -41,8 +32,6 @@ containers = [
     }
 ]
 
-rearrangement_optimizer = RearrangementOptimizer(INITIAL_STOWAGE_SOLUTION, CONTAINER_CAPACITIES)
-
 new_item = {
     "id": 3,
     "name": "Medical Kit",
@@ -56,8 +45,6 @@ new_item = {
     "preferred-zone": "Crew_Quarters"
 }
 
-
-
 # Define ISS Modules (width, depth, height in cm)
 modules = {
     "Crew_Quarters": {"width": 100, "depth": 100, "height": 200},
@@ -65,30 +52,20 @@ modules = {
 }
 
 if __name__ == "__main__":
-    # Assuming you have an instance of RetrievalOptimizer
-    stowage_solution = {
-        "placements": [
-            {
-                "itemId": "item1",
-                "name": "Food Pack",
-                "position": {"startCoordinates": {"height": 1}, "endCoordinates": {"height": 2}},
-                "containerId": "module1",
-                "expiryDate": datetime(2025, 4, 1)
-            },
-            {
-                "itemId": "item2",
-                "name": "Food Pack",
-                "position": {"startCoordinates": {"height": 3}, "endCoordinates": {"height": 4}},
-                "containerId": "module1",
-                "expiryDate": datetime(2025, 3, 30)
-            }
-        ]
-    }
+    # Initialize StowageOptimizer
+    optimizer = StowageOptimizer(containers, modules)
 
-    optimizer = RetrievalOptimizer(stowage_solution)
+    # Run the optimization
+    placement_result = optimizer.simulated_annealing()
+
+    # Print the result
+    print("Placement Result:", placement_result)
+
+    # Initialize RetrievalOptimizer
+    retrieval_optimizer = RetrievalOptimizer(INITIAL_STOWAGE_SOLUTION)
 
     # Search for an item by name
-    result = optimizer.search_item("Food Pack")
+    result = retrieval_optimizer.search_item("Food Pack")
 
     # Print the result
     if result["success"]:
@@ -96,5 +73,9 @@ if __name__ == "__main__":
     else:
         print("Error:", result["message"])
 
+    # Initialize RearrangementOptimizer
+    rearrangement_optimizer = RearrangementOptimizer(INITIAL_STOWAGE_SOLUTION, CONTAINER_CAPACITIES)
+
+    # Suggest rearrangement for the new item
     rearrangement_result = rearrangement_optimizer.suggest_rearrangement(new_item)
     print("Rearrangement Result:", rearrangement_result)
