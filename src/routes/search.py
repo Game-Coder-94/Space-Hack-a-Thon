@@ -4,7 +4,7 @@ from src.services.search_service import search_item
 
 router = APIRouter()
 
-@router.post("/api/search", response_model=SearchResponse)
+@router.post("/", response_model=SearchResponse)
 async def search(request: SearchRequest):
     result = search_item(itemId=request.itemId, itemName=request.itemName, userId=request.userId)
 

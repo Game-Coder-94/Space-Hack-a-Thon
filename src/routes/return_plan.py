@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from src.services.waste_management_service import generate_return_plan
+from src.services.return_plan import generate_return_plan
 
 router = APIRouter()
 

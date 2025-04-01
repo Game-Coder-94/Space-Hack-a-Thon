@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from src.services.waste_management_service import complete_undocking
+from src.services.complete_undocking_service import complete_undocking
 
 router = APIRouter()
 

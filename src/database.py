@@ -26,6 +26,7 @@ INITIAL_STOWAGE_SOLUTION = {
 }
 
 # Simulated Database
+# Search logic using this database
 containers = {
     "A1": [{"itemId": "101", "itemName": "Oxygen Tank", "userId": "U123"},
            {"itemId": "102", "itemName": "Water Supply", "userId": "U124"}],

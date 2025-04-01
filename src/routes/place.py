@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from src.services.placement_service import place_item
+from src.services.place_service import place_item
 
 router = APIRouter()
 

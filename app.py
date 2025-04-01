@@ -21,7 +21,7 @@ templates = Jinja2Templates(directory="front_end")
 # Register routers
 app.include_router(search_router, prefix="/api/search", tags=["Search"])
 app.include_router(placement_router, prefix="/api/placement", tags=["Placement"])
-app.include_router(retrieval_router, prefix="/api/retrieval", tags=["Retrieval"])
+app.include_router(retrieval_router, prefix="/api/retrieve", tags=["Retrieval"])
 app.include_router(waste_management_router, prefix="/api/waste", tags=["Waste Management"])
 app.include_router(time_simulation_router, prefix="/api", tags=["Time Simulation"])
 app.include_router(place_router, prefix="/api", tags=["Placement"])

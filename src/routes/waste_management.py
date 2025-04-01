@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from src.services.waste_management_service import identify_waste
-from database import get_all_items  # Assuming this function retrieves all items
+# from database import get_all_items  # Assuming this function retrieves all items
+from src.database import get_all_items
 
 router = APIRouter()
 
