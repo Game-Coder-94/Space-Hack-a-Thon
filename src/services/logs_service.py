@@ -1,6 +1,7 @@
 # Log logic not not implemented
 
 from datetime import datetime
+from pymongo import MongoClient
 
 def get_logs(start_date, end_date, item_id=None, user_id=None, action_type=None):
     """
@@ -23,31 +24,26 @@ def get_logs(start_date, end_date, item_id=None, user_id=None, action_type=None)
     except ValueError:
         raise ValueError("Invalid date format. Use ISO format (YYYY-MM-DDTHH:MM:SS).")
 
-    # Example log data (replace with actual database or data source logic)
-    logs = [
-        {
-            "timestamp": "2025-04-01T10:00:00Z",
-            "userId": "user123",
-            "actionType": "placement",
-            "itemId": "item1",
-            "details": {
-                "fromContainer": "storage1",
-                "toContainer": "containerA",
-                "reason": "Scheduled placement"
-            }
-        },
-        {
-            "timestamp": "2025-04-02T12:00:00Z",
-            "userId": "user456",
-            "actionType": "retrieval",
-            "itemId": "item2",
-            "details": {
-                "fromContainer": "containerB",
-                "toContainer": "workspace",
-                "reason": "Usage"
-            }
+    # Connect to MongoDB
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["space_hackathon"]  # Replace with your database name
+    logs_collection = db["logs"]  # Replace with your collection name
+
+    # Fetch logs from MongoDB
+    query = {
+        "timestamp": {
+            "$gte": start_date.isoformat(),
+            "$lte": end_date.isoformat()
         }
-    ]
+    }
+    if item_id:
+        query["itemId"] = item_id
+    if user_id:
+        query["userId"] = user_id
+    if action_type:
+        query["actionType"] = action_type
+
+    logs = list(logs_collection.find(query))
 
     # Filter logs based on query parameters
     filtered_logs = [

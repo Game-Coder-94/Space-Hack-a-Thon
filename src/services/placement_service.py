@@ -96,12 +96,49 @@ class StowageOptimizer:
         return container_volume <= available_volume
 
     def get_best_fit_position(self, module, container, occupied_positions):
-        """Finds the best position for the container in the module."""
-        # Placeholder logic for finding the best position
-        return {
-            "startCoordinates": {"width": 0, "depth": 0, "height": 0},
-            "endCoordinates": {"width": container["width"], "depth": container["depth"], "height": container["height"]}
-        }
+        """Finds the best position for the container in the module using Best-Fit Decreasing algorithm."""
+        module_dims = self.modules[module]
+        container_dims = (container["width"], container["depth"], container["height"])
+
+        # Sort occupied positions by their start coordinates
+        occupied_positions = sorted(occupied_positions, key=lambda pos: (
+            pos["startCoordinates"]["width"],
+            pos["startCoordinates"]["depth"],
+            pos["startCoordinates"]["height"]
+        ))
+
+        # Iterate through the module space to find the best fit
+        for width in range(module_dims["width"] - container_dims[0] + 1):
+            for depth in range(module_dims["depth"] - container_dims[1] + 1):
+                for height in range(module_dims["height"] - container_dims[2] + 1):
+                    # Check if the container fits without overlapping
+                    position = {
+                        "startCoordinates": {"width": width, "depth": depth, "height": height},
+                        "endCoordinates": {
+                            "width": width + container_dims[0],
+                            "depth": depth + container_dims[1],
+                            "height": height + container_dims[2]
+                        }
+                    }
+                    if not self.is_overlapping(position, occupied_positions):
+                        return position
+
+        # If no position is found, return None
+        return None
+
+    def is_overlapping(self, position, occupied_positions):
+        """Checks if a position overlaps with any occupied positions."""
+        for occupied in occupied_positions:
+            if not (
+                position["endCoordinates"]["width"] <= occupied["startCoordinates"]["width"] or
+                position["startCoordinates"]["width"] >= occupied["endCoordinates"]["width"] or
+                position["endCoordinates"]["depth"] <= occupied["startCoordinates"]["depth"] or
+                position["startCoordinates"]["depth"] >= occupied["endCoordinates"]["depth"] or
+                position["endCoordinates"]["height"] <= occupied["startCoordinates"]["height"] or
+                position["startCoordinates"]["height"] >= occupied["endCoordinates"]["height"]
+            ):
+                return True
+        return False
 
     def place(self, item, container_id):
         """
