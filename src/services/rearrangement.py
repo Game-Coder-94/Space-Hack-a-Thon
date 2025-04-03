@@ -1,3 +1,6 @@
+from datetime import datetime
+from src.services.logs_service import log_action
+
 class RearrangementOptimizer:
     def __init__(self, stowage_solution, container_capacity):
         self.stowage_solution = stowage_solution
@@ -33,13 +36,33 @@ class RearrangementOptimizer:
 
         for item in removable_items:
             item_volume = self.calculate_volume(item)
+            alternative_container = self.find_alternative_container(container_id, item_volume)
+
+            if alternative_container == "No alternative found":
+                continue
+
             moved_items.append({
                 "step": step_count,
                 "action": "move",
                 "itemId": item["itemId"],
                 "fromContainer": container_id,
-                "toContainer": self.find_alternative_container(container_id, item_volume),
+                "toContainer": alternative_container,
+                "volume": item_volume
             })
+
+            # Log the action
+            log_action({
+                "timestamp": datetime.now().isoformat(),
+                "userId": "system",  # System-initiated rearrangement
+                "actionType": "rearrangement",
+                "itemId": item["itemId"],
+                "details": {
+                    "fromContainer": container_id,
+                    "toContainer": alternative_container,
+                    "reason": "Space optimization for new item"
+                }
+            })
+
             freed_space += item_volume
             step_count += 1
 

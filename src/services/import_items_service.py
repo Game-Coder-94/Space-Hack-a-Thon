@@ -1,5 +1,6 @@
 import csv
 from io import StringIO
+from pymongo import MongoClient
 
 async def import_items_from_csv(file):
     """
@@ -28,7 +29,14 @@ async def import_items_from_csv(file):
                 if field not in row or not row[field]:
                     raise ValueError(f"Missing required field: {field}")
 
-            # Example logic: Simulate saving the item (replace with actual database logic)
+            # Save the item to MongoDB (replace with actual database logic)
+
+            # Establish MongoDB connection (ensure to configure connection string properly)
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client["space_hackathon"]
+            collection = db["items"]
+
+            # Create the item document
             item = {
                 "itemId": row["itemId"],
                 "name": row["name"],
@@ -38,7 +46,9 @@ async def import_items_from_csv(file):
                 "mass": float(row["mass"]),
                 "priority": int(row["priority"])
             }
-            print(f"Imported item: {item}")  # Replace with actual database save logic
+
+            # Insert the item into the collection
+            collection.insert_one(item)
             items_imported += 1
 
         except Exception as e:

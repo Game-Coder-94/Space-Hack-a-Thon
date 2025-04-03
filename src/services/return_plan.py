@@ -1,4 +1,5 @@
 from datetime import datetime
+from src.services.waste_management_service import identify_waste
 
 def generate_return_plan(undocking_container_id, undocking_date, max_weight):
     """
@@ -18,12 +19,7 @@ def generate_return_plan(undocking_container_id, undocking_date, max_weight):
     except ValueError:
         raise ValueError("Invalid undocking date format. Use ISO format (YYYY-MM-DDTHH:MM:SS).")
 
-    # Example logic: Retrieve waste items (replace with actual logic)
-    waste_items = [
-        {"itemId": "item1", "name": "Expired Food", "reason": "Expired", "weight": 10, "volume": 5},
-        {"itemId": "item2", "name": "Damaged Equipment", "reason": "Damaged", "weight": 15, "volume": 8},
-        {"itemId": "item3", "name": "Used Medical Supplies", "reason": "Used", "weight": 5, "volume": 3}
-    ]
+    waste_items = identify_waste()
 
     # Filter items to fit within the max weight
     return_items = []

@@ -1,4 +1,6 @@
 from datetime import datetime
+import sqlite3
+from pymongo import MongoClient
 
 def place_item(data):
     """
@@ -21,17 +23,23 @@ def place_item(data):
     except ValueError:
         raise ValueError("Invalid timestamp format. Use ISO format (YYYY-MM-DDTHH:MM:SS).")
 
-    # Example logic: Simulate saving the placement to a database
-    placement_log = {
+    # Connect to the MongoDB database
+    client = MongoClient('mongodb://localhost:27017/')
+    db = client['space_hackathon']
+    placements_collection = db['placements']
+
+    # Insert the placement data into the collection
+    placement_data = {
         "itemId": data["itemId"],
         "userId": data["userId"],
-        "timestamp": timestamp,
+        "timestamp": data["timestamp"],
         "containerId": data["containerId"],
         "position": data["position"]
     }
+    placements_collection.insert_one(placement_data)
 
-    # Simulate saving to a database or performing some action
-    print("Placement logged:", placement_log)
+    # Close the connection
+    client.close()
 
     # Return success
     return True

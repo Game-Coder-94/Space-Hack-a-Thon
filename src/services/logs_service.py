@@ -1,5 +1,3 @@
-# Log logic not not implemented
-
 from datetime import datetime
 from pymongo import MongoClient
 
@@ -55,3 +53,37 @@ def get_logs(start_date, end_date, item_id=None, user_id=None, action_type=None)
     ]
 
     return filtered_logs
+
+
+def log_action(action):
+    """
+    Logs an action into the MongoDB database.
+
+    Args:
+        action (dict): The action details to log. Example:
+            {
+                "timestamp": "2025-04-01T10:00:00",
+                "userId": "user123",
+                "actionType": "retrieval",
+                "itemId": "item1",
+                "details": {
+                    "fromContainer": "moduleA",
+                    "toContainer": "moduleB",
+                    "reason": "Astronaut retrieval"
+                }
+            }
+    """
+    # Validate the action structure
+    required_fields = ["timestamp", "userId", "actionType", "itemId", "details"]
+    for field in required_fields:
+        if field not in action:
+            raise ValueError(f"Missing required field: {field}")
+
+    # Connect to MongoDB
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["space_hackathon"]  # Replace with your database name
+    logs_collection = db["logs"]  # Replace with your collection name
+
+    # Insert the action into the logs collection
+    logs_collection.insert_one(action)
+    print(f"Action logged: {action}")

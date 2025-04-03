@@ -1,6 +1,3 @@
-import math
-import random
-from datetime import datetime
 from src.services.rearrangement import RearrangementOptimizer
 
 class StowageOptimizer:
@@ -38,7 +35,14 @@ class StowageOptimizer:
 
             if not placed:
                 # Handle unplaced containers
-                pass
+                solution["placements"].append({
+                    "itemId": container["id"],
+                    "name": container["name"],
+                    "position": None,
+                    "containerId": None,
+                    "priority": container["priority"],
+                    "status": "unplaced"
+                })
 
         return solution
 

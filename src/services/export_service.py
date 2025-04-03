@@ -1,3 +1,5 @@
+from pymongo import MongoClient
+
 def get_current_arrangement():
     """
     Retrieves the current arrangement of items in containers.
@@ -5,19 +7,12 @@ def get_current_arrangement():
     Returns:
         list: A list of dictionaries representing the arrangement.
     """
-    # Example arrangement data (replace with actual database or data source logic)
-    arrangement = [
-        {
-            "itemId": "001",
-            "containerId": "contA",
-            "startCoordinates": {"width": 0, "depth": 0, "height": 0},
-            "endCoordinates": {"width": 10, "depth": 10, "height": 20}
-        },
-        {
-            "itemId": "002",
-            "containerId": "contB",
-            "startCoordinates": {"width": 0, "depth": 0, "height": 0},
-            "endCoordinates": {"width": 15, "depth": 15, "height": 50}
-        }
-    ]
+    # Connect to MongoDB
+    client = MongoClient("mongodb://localhost:27017/")
+    db = client["space_hackathon"]  # Replace with your database name
+    collection = db["arrangements"]  # Replace with your collection name
+
+    # Retrieve arrangement data from MongoDB
+    arrangement = list(collection.find({}, {"_id": 0}))  # Exclude the MongoDB _id field
+    
     return arrangement

@@ -107,31 +107,38 @@ class RetrievalOptimizer:
 
         return retrieval_result
 
-    def log_action(self, item_id, from_container, from_position, to_container):
-        """
-        Logs the retrieval action in the database.
-        """
-        log_entry = {
-            "itemId": item_id,
-            "retrievedBy": "Astronaut",  # Replace with actual user info
-            "timestamp": datetime.datetime.now().isoformat(),
-            "fromContainer": from_container,
-            "fromPosition": from_position,
-            "toContainer": to_container
-        }
-        # Simulate logging (replace with actual database call)
-        print("Log Entry:", log_entry)
-
     def get_obstruction_cost(self, position):
         """
         Calculates the obstruction cost for a given position.
         """
-        # Placeholder for obstruction cost calculation
-        return position["startCoordinates"]["height"]
+        # The obstruction cost is calculated based on the height of the item.
+        # Higher items are considered more obstructive.
+        return position["endCoordinates"]["height"] - position["startCoordinates"]["height"]
 
     def find_temporary_space(self, module):
         """
         Finds a temporary space in the module for rearranging items.
         """
-        # Placeholder for finding temporary space
-        return {"startCoordinates": {"height": 0}, "endCoordinates": {"height": 1}}
+        # Find an unoccupied space in the module for temporary placement.
+        occupied_positions = [
+            item["position"] for item in self.stowage_solution["placements"]
+            if item["containerId"] == module
+        ]
+
+        # Assuming the module has a fixed height range (e.g., 0 to 10)
+        for height in range(0, 11):
+            temp_space = {
+                "startCoordinates": {"height": height},
+                "endCoordinates": {"height": height + 1}
+            }
+            if all(
+                not (
+                    temp_space["startCoordinates"]["height"] < pos["endCoordinates"]["height"]
+                    and temp_space["endCoordinates"]["height"] > pos["startCoordinates"]["height"]
+                )
+                for pos in occupied_positions
+            ):
+                return temp_space
+
+        # If no space is found, return None (should not happen in a well-managed module)
+        return None

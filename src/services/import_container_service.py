@@ -1,5 +1,6 @@
 import csv
 from io import StringIO
+from pymongo import MongoClient
 
 async def import_containers_from_csv(file):
     """
@@ -28,7 +29,12 @@ async def import_containers_from_csv(file):
                 if field not in row or not row[field]:
                     raise ValueError(f"Missing required field: {field}")
 
-            # Example logic: Simulate saving the container (replace with actual database logic)
+            # Establish MongoDB connection (adjust connection string as needed)
+            client = MongoClient("mongodb://localhost:27017/")
+            db = client["space_hackathon"]
+            containers_collection = db["containers"]
+
+            # Create the container document
             container = {
                 "containerId": row["containerId"],
                 "zone": row["zone"],
@@ -36,7 +42,9 @@ async def import_containers_from_csv(file):
                 "depth": float(row["depth"]),
                 "height": float(row["height"])
             }
-            print(f"Imported container: {container}")  # Replace with actual database save logic
+
+            # Insert the container into the database
+            containers_collection.insert_one(container)
             containers_imported += 1
 
         except Exception as e:
