@@ -1,1 +1,65 @@
-Database 
+const express = require('express');
+const mongoose = require('mongoose');
+
+// Initialize Express App
+const app = express();
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/hackathon_db', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('MongoDB Connected'))
+  .catch(err => console.error(err));
+
+// Define Schemas & Models
+const ContainerSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  location: { type: String, required: true }
+});
+const Container = mongoose.model('Container', ContainerSchema);
+
+const ItemSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  weight: { type: Number, required: true },
+  containerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Container' }
+});
+const Item = mongoose.model('Item', ItemSchema);
+
+const LogSchema = new mongoose.Schema({
+  action: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now }
+});
+const Log = mongoose.model('Log', LogSchema);
+
+const WasteManagementSchema = new mongoose.Schema({
+  status: { type: String, required: true },
+  action_required: { type: Boolean, default: false }
+});
+const WasteManagement = mongoose.model('WasteManagement', WasteManagementSchema);
+
+// CRUD Operations
+app.post('/containers', async (req, res) => {
+  const container = new Container(req.body);
+  await container.save();
+  res.json(container);
+});
+
+app.get('/containers', async (req, res) => {
+  const containers = await Container.find().populate('items');
+  res.json(containers);
+});
+
+app.post('/items', async (req, res) => {
+  const item = new Item(req.body);
+  await item.save();
+  res.json(item);
+});
+
+app.get('/items', async (req, res) => {
+  const items = await Item.find().populate('containerId');
+  res.json(items);
+});
+
+// Server Setup
+app.listen(3000, () => console.log('Server running on port 3000'));
