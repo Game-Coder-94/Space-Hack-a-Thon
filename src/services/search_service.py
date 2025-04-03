@@ -1,5 +1,6 @@
 from datetime import datetime
-from src.database import get_all_items, log_action
+from src.database import get_all_items
+from src.services.waste_management_service import log_action
 
 def binary_search(data, key, search_by):
     low, high = 0, len(data) - 1
