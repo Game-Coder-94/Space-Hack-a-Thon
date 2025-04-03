@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from src.database import db
+from src.models import Container, Item
+from bson import ObjectId
 from fastapi.templating import Jinja2Templates
 from src.routes.search import router as search_router
 from src.routes.placement import router as placement_router
@@ -31,6 +34,32 @@ app.include_router(import_items_router, prefix="/api", tags=["Import Items"])
 app.include_router(import_containers_router, prefix="/api", tags=["Import Containers"])
 app.include_router(export_arrangement_router, prefix="/api", tags=["Export Arrangement"])
 app.include_router(logs_router, prefix="/api", tags=["Logs"])
+
+# Create a container
+@app.post("/containers")
+async def create_container(container: Container):
+    result = await db.containers.insert_one(container.dict())
+    return {"id": str(result.inserted_id)}
+
+# Get all containers
+@app.get("/containers")
+async def get_containers():
+    containers = await db.containers.find().to_list(100)
+    return containers
+
+# Create an item
+@app.post("/items")
+async def create_item(item: Item):
+    if not ObjectId.is_valid(item.container_id):
+        raise HTTPException(status_code=400, detail="Invalid container ID")
+    result = await db.items.insert_one(item.dict())
+    return {"id": str(result.inserted_id)}
+
+# Get all items
+@app.get("/items")
+async def get_items():
+    items = await db.items.find().to_list(100)
+    return items
 
 @app.get("/")
 async def index(request):

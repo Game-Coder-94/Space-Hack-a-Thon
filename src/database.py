@@ -1,29 +1,13 @@
-# Container capacities for different modules
-CONTAINER_CAPACITIES = {
-    "Crew_Quarters": 100000,
-    "Destiny": 80000,
-    "Columbus": 90000
-}
+from motor.motor_asyncio import AsyncIOMotorClient
 
-# Initial stowage solution (example data)
-INITIAL_STOWAGE_SOLUTION = {
-    "placements": [
-        {
-            "itemId": "item1",
-            "name": "Food Pack",
-            "position": {"startCoordinates": {"height": 1}, "endCoordinates": {"height": 2}},
-            "containerId": "module1",
-            "expiryDate": "2025-04-01"
-        },
-        {
-            "itemId": "item2",
-            "name": "Food Pack",
-            "position": {"startCoordinates": {"height": 3}, "endCoordinates": {"height": 4}},
-            "containerId": "module1",
-            "expiryDate": "2025-03-30"
-        }
-    ]
-}
+# MongoDB connection string
+MONGO_URI = "mongodb://localhost:27017"
+
+# Initialize MongoDB client
+client = AsyncIOMotorClient(MONGO_URI)
+
+# Access the database
+db = client["hackathon_db"]
 
 # Simulated Database
 # Search logic using this database
