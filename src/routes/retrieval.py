@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request
 from src.services.retrieval_service import RetrievalOptimizer
+from src.services.placement_service import StowageOptimizer
 
 # Include the router from retrieval.py
 router = APIRouter()
@@ -15,7 +16,8 @@ async def retrieve_item(request: Request):
         raise HTTPException(status_code=400, detail="Missing required fields")
 
     # Use the RetrievalOptimizer from retrieval.py for retrieval logic
-    optimizer = RetrievalOptimizer()
+    stowage_solution = StowageOptimizer.initialize_solution()
+    optimizer = RetrievalOptimizer(stowage_solution)
     success = optimizer.optimize_retrieval(item_id, user_id, timestamp)
 
     return {"success": success}

@@ -4,6 +4,37 @@ class RetrievalOptimizer:
     def __init__(self, stowage_solution):
         self.stowage_solution = stowage_solution
 
+    def optimize_retrieval(self, item_id, user_id, timestamp):
+        """
+        Optimizes the retrieval of an item by generating retrieval steps and logging the action.
+        """
+        # Search for the item by ID
+        item_data = next((item for item in self.stowage_solution["placements"] if item["itemId"] == item_id), None)
+
+        if not item_data:
+            return {"success": False, "message": "Item not found in stowage."}
+
+        # Generate retrieval steps
+        retrieval_result = self.retrieval_steps(item_id)
+
+        # Log the retrieval action
+        self.log_action(item_id, user_id, timestamp, retrieval_result)
+
+        return retrieval_result
+
+    def log_action(self, item_id, user_id, timestamp, retrieval_result):
+        """
+        Logs the retrieval action.
+        """
+        log_entry = {
+            "timestamp": timestamp,
+            "userId": user_id,
+            "actionType": "retrieval",
+            "itemId": item_id,
+            "details": retrieval_result
+        }
+        print(f"Log Entry: {log_entry}")  # Replace with actual logging to a database or file
+
     def is_obstructing(self, target_position, item_position):
         """
         Checks if an item obstructs the retrieval of another item.
